@@ -1,0 +1,145 @@
+# depslib dependency file v1.0
+1616437721 source:d:\1yannick\_1_sfa\_2020-2021\semestre 2\l2 projet de prog\liste doublement chainée\listedouble\listedouble.c
+	<stdio.h>
+	<stdlib.h>
+	"listeDouble.h"
+
+1616437763 d:\1yannick\_1_sfa\_2020-2021\semestre 2\l2 projet de prog\liste doublement chainée\listedouble\listedouble.h
+	<stdbool.h>
+
+1616437754 source:d:\1yannick\_1_sfa\_2020-2021\semestre 2\l2 projet de prog\liste doublement chainée\listedouble\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	"listeDouble.h"
+
+1770657062 source:c:\users\etusfa\desktop\fichiertest\etape1 listedouble(1)\listedouble\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	"listeDouble.h"
+
+1770654945 c:\users\etusfa\desktop\fichiertest\etape1 listedouble(1)\listedouble\listedouble.h
+	<stdbool.h>
+
+1770656952 source:c:\users\etusfa\desktop\fichiertest\etape1 listedouble(1)\listedouble\listedouble.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"listeDouble.h"
+
+1770662810 source:c:\users\cloeb\onedrive\documents\codeblocks\listedouble\listedouble\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	"listeDouble.h"
+
+1770659516 c:\users\cloeb\onedrive\documents\codeblocks\listedouble\listedouble\listedouble.h
+	<stdbool.h>
+
+1770663191 source:c:\users\cloeb\onedrive\documents\codeblocks\listedouble\listedouble\listedouble.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"listeDouble.h"
+
+1770735192 source:c:\users\etusfa\desktop\fichiertest\listedouble\listedouble\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	"listeDouble.h"
+
+1770731996 c:\users\etusfa\desktop\fichiertest\listedouble\listedouble\listedouble.h
+	<stdbool.h>
+
+1770735572 source:c:\users\etusfa\desktop\fichiertest\listedouble\listedouble\listedouble.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"listeDouble.h"
+
+1772471356 source:c:\users\etusfa\desktop\fichiertest\listedouble(1)\listedouble\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	"listeDouble.h"
+
+1772471241 c:\users\etusfa\desktop\fichiertest\listedouble(1)\listedouble\listedouble.h
+	<stdbool.h>
+
+1772471454 source:c:\users\etusfa\desktop\fichiertest\listedouble(1)\listedouble\listedouble.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"listeDouble.h"
+
+1773059739 source:c:\users\cloeb\onedrive\documents\codeblocks\listedouble\listedouble02032026\listedouble\listedouble.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"listeDouble.h"
+
+1773059646 c:\users\cloeb\onedrive\documents\codeblocks\listedouble\listedouble02032026\listedouble\listedouble.h
+	<stdbool.h>
+
+1773059646 source:c:\users\cloeb\onedrive\documents\codeblocks\listedouble\listedouble02032026\listedouble\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	"listeDouble.h"
+
+1773071005 source:c:\users\etusfa\downloads\listedouble09032026\listedouble02032026\listedouble\listedouble.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"listeDouble.h"
+
+1773071103 c:\users\etusfa\downloads\listedouble09032026\listedouble02032026\listedouble\listedouble.h
+	<stdbool.h>
+
+1773074842 source:c:\users\etusfa\downloads\listedouble09032026\listedouble02032026\listedouble\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	"listeDouble.h"
+
+1773076306 source:c:\users\etusfa\downloads\listedouble09032026\listedouble02032026\listedouble\tri_liste.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"listeDouble.h"
+	"tri_liste.h"
+
+1773074446 c:\users\etusfa\downloads\listedouble09032026\listedouble02032026\listedouble\tri_liste.h
+	<stdbool.h>
+	"listeDouble.h"
+
+1773148402 source:c:\users\etusfa\downloads\listedouble(1)\listedouble\listedouble.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"listeDouble.h"
+
+1773144738 c:\users\etusfa\downloads\listedouble(1)\listedouble\listedouble.h
+	<stdbool.h>
+
+1773153938 source:c:\users\etusfa\downloads\listedouble(1)\listedouble\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	<time.h>
+	"listeDouble.h"
+
+1773154649 source:c:\users\etusfa\downloads\listedouble(1)\listedouble\tri_liste.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<time.h>
+	"listeDouble.h"
+	"tri_liste.h"
+
+1773153541 c:\users\etusfa\downloads\listedouble(1)\listedouble\tri_liste.h
+	<stdbool.h>
+	<time.h>
+	"listeDouble.h"
+
