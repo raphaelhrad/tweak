@@ -143,3 +143,19 @@
 	<time.h>
 	"listeDouble.h"
 
+1773491501 source:c:\users\herau\onedrive\documents\github\prog-c\listedouble.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"listeDouble.h"
+
+1773491501 c:\users\herau\onedrive\documents\github\prog-c\listedouble.h
+	<stdbool.h>
+
+1773491501 source:c:\users\herau\onedrive\documents\github\prog-c\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdbool.h>
+	<time.h>
+	"listeDouble.h"
+

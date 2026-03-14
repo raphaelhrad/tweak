@@ -93,11 +93,11 @@ void chronometrerTriN(int n){
     printf("Tri exécuté en %.2f seconde(s) pour %d entiers !", difftime(apres, now), n);
 }
 
-//Etape 3
+//Etape 3 : ne marche pas !!
 void tri_selection_liste(T_liste l){
-    for (T_liste ptr = getptrFirstCell(l); ptr != NULL; ptr = getptrNextCell(ptr)){ //premier parcours : valeur examinér
+    for (T_liste ptr = getptrFirstCell(l); ptr != NULL; ptr = getptrNextCell(ptr)){ //premier parcours : valeur examinée
         printf("%d\n", *(ptr->pdata));
-        for (T_liste ptr2 = getptrNextCell(ptr); ptr2 != NULL; ptr2 = getptrNextCell(ptr2)){
+        for (T_liste ptr2 = getptrNextCell(ptr); ptr2 != NULL; ptr2 = getptrNextCell(ptr2)){ //On trouve une valeur plus petite à mettre avant
             if (*(ptr->pdata) > *(ptr2->pdata)){
                 swapPtrData(ptr, ptr2);
             }
