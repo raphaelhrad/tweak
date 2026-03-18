@@ -173,6 +173,10 @@ bool comparaisonPDVAinfB(Tunite UniteA, Tunite UniteB){
     return UniteA.pointsDeVie < UniteB.pointsDeVie;
 }
 
+bool comparaisonUniteAegaleB(Tunite UniteA, Tunite UniteB){
+    return true;
+}
+
 Tunite* premierElementTListePlayer(TListePlayer listeUnites){
     return listeUnites->pdata;
 }
@@ -357,3 +361,6 @@ Tunite *creeGargouille(int posx, int posy){
     //nouv->cible = NULL;
     return nouv;
 }
+
+// Affichage des Tunites pour vérifier que ça fonctionne bien
+
