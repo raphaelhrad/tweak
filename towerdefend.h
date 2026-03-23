@@ -36,10 +36,12 @@ typedef struct {
     //int score_emplacement;  //un clin d'oeil pour suscister une idée de tri
 } Tunite;
 
-typedef struct T_cell{
+typedef struct T_cell {
     struct T_cell *suiv;
-    Tunite *pdata; //pointeur vers une unité
-} *TListePlayer;
+    Tunite *pdata;
+} T_cell;
+
+typedef T_cell *TListePlayer;
 
 
 typedef Tunite* ** TplateauJeu;  ////tableau a deux dimensions de largeur 11 et hauteur 19 contenant des pointeurs (Tunite*)
@@ -56,12 +58,15 @@ void initPlateauAvecNULL(TplateauJeu jeu,int largeur, int hauteur);
 void affichePlateauConsole(TplateauJeu jeu, int largeur, int hauteur);
 
 bool comparaisonPDVAinfB(Tunite UniteA, Tunite UniteB);
+bool comparaisonUniteAegaleB(Tunite UniteA, Tunite UniteB);
 Tunite* premierElementTListePlayer(TListePlayer listeUnites);
 
 Tunite *creeTourSol(int posx, int posy);
 Tunite *creeTourAir(int posx, int posy);
 Tunite *creeTourRoi(int posx, int posy);
 
+int CoordValideEnX(int calculCoord, int portee);
+int CoordValideEnY(int calculCoord, int portee);
 /* fonctions du noyau que vous avez à coder
 
 Bool tourRoiDetruite(TListePlayer player);
@@ -71,6 +76,7 @@ TListePlayer quiEstAPortee(TplateauJeu jeu, Tunite *UniteAttaquante) ; //retourn
 Void combat(SDL_Surface *surface , Tunite * UniteAttaquante, Tunite * UniteCible);  //qui utilise dessineAttaque (de maSDL.h)
 
 */
+
 Tunite *creeArcher(int posx, int posy);
 Tunite *creeGargouille(int posx, int posy);
 Tunite *creeDragon(int posx, int posy);
@@ -82,5 +88,11 @@ Void supprimerUnite(TListePlayer *player, Tunite *UniteDetruite);
 Void AjouterUnite(TListePlayer *player, Tunite *nouvelleUnite);
 
 */
+// Affichage Tunite
+
+char* TuniteDuJeuToString(TuniteDuJeu t);
+char* TcibleToString(Tcible c);
+void printUnite(Tunite u);
+void afficheTListePlayer(TListePlayer l);
 
 #endif // TOWERDEFEND_H_INCLUDED

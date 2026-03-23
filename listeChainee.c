@@ -9,7 +9,7 @@ void initListe(TListePlayer* l){
 }
 
 bool listeVide(TListePlayer l){
-    return TListePlayer == NULL;
+    return l == NULL;
 }
 
 TListePlayer AjoutEnTete(TListePlayer l, Tunite data){
@@ -22,7 +22,7 @@ TListePlayer AjoutEnTete(TListePlayer l, Tunite data){
         l = newcell;
         return l;
     }
-    TListePlayer temp = l->suiv;
+    TListePlayer temp = l;
     newcell->suiv = temp;
     newcell->pdata = newdata;
     *newcell->pdata = data;

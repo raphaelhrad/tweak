@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "SDL.h"
 #include "towerdefend.h"
+#include "listeChainee.h"
 
 
 //typedef Tunite* ** TplateauJeu;
@@ -154,27 +155,52 @@ bool tourRoiDetruite(TListePlayer playerRoi){
  //sinon : false
 }
 
-/*
-Fonction de tri
+int CoordValideEnX(int calculCoord, int portee){
+    if(calculCoord < 0){ return 0; }
+    if(calculCoord > LARGEURJEU - 1){ return LARGEURJEU - 1; }
+    return calculCoord;
+}
+
+int CoordValideEnY(int calculCoord, int portee){
+    if(calculCoord < 0){ return 0; }
+    if(calculCoord > HAUTEURJEU - 1){ return HAUTEURJEU - 1; }
+    return calculCoord;
+}
 
 TListePlayer quiEstAPortee(TplateauJeu jeu, Tunite *UniteAttaquante){
     TListePlayer listePortee;
-    TListePlayer = NULL;
-    for (int i = ;)
-        for (int j =; )
-            Si UniteAttaquante ou PAS, Horde vs Horde pas possible
-    Tri de la liste par pdv
+    TListePlayer = initListe(*listePortee);
+    //Calcul coordonnées
+    int posxD = CoordValideEnX(UniteAttaquante.posX - UniteAttaquante.portee);
+    int posyD = CoordValideEnY(UniteAttaquante.posY - UniteAttaquante.portee);
+    int posxF = CoordValideEnX(UniteAttaquante.posX + UniteAttaquante.portee);
+    int posyF = CoordValideEnY(UniteAttaquante.posY + UniteAttaquante.portee);
+    //Parcours du tableau pour chercher les unités à portée
+    /* - si l'unite fait partie de la horde alors alors que l'unité attaquante est de la horde on l'ignore
+       - si l'unite est une tour du roi alors on l'ignore
+       - Toutes les cibles ne sont pas attaquables, bien vérifier que l'unite attaquante peut attaquer l'unité à portée
+    */
+    //Tri de la liste selon le nombre de points de vie
     return listePortee;
-    Toutes les cibles ne sont pas attaquables : air, sol, airsol
 }
-*/
+
 
 bool comparaisonPDVAinfB(Tunite UniteA, Tunite UniteB){
     return UniteA.pointsDeVie < UniteB.pointsDeVie;
 }
 
 bool comparaisonUniteAegaleB(Tunite UniteA, Tunite UniteB){
-    return true;
+    return (UniteA.nom == UniteB.nom)
+        && (UniteA.cibleAttaquable == UniteB.cibleAttaquable)
+        && (UniteA.maposition == UniteB.maposition)
+        && (UniteA.pointsDeVie == UniteB.pointsDeVie)
+        && (UniteA.vitesseAttaque == UniteB.vitesseAttaque)
+        && (UniteA.degats == UniteB.degats)
+        && (UniteA.portee == UniteB.portee)
+        && (UniteA.vitessedeplacement == UniteB.vitessedeplacement)
+        && (UniteA.posX == UniteB.posX)
+        && (UniteA.posY == UniteB.posY)
+        && (UniteA.peutAttaquer == UniteB.peutAttaquer) ;
 }
 
 Tunite* premierElementTListePlayer(TListePlayer listeUnites){
@@ -223,9 +249,10 @@ void ajouterUnite(TListePlayer *player, Tunite *nouvelleUnite){
 
 /* à faire en dernier car algorithme
 à vérifier positionCreationUniteRoi(){
-
 }
 */
+
+//Création
 
 void creationUniteAleatoireRoi(){
     //15-50% de proba
@@ -364,3 +391,70 @@ Tunite *creeGargouille(int posx, int posy){
 
 // Affichage des Tunites pour vérifier que ça fonctionne bien
 
+char* TuniteDuJeuToString(TuniteDuJeu t){
+    char* resultat;
+    switch((int) t){
+        case 0 :
+            resultat = "tourSol";
+            break;
+        case 1 :
+            resultat = "tourAir";
+            break;
+        case 2 :
+            resultat = "tourRoi";
+            break;
+        case 3 :
+            resultat = "archer";
+            break;
+        case 4 :
+            resultat = "chevalier";
+            break;
+        case 5 :
+            resultat = "dragon";
+            break;
+        case 6 :
+            resultat = "gargouille";
+            break;
+        default :
+            resultat = "inconnu";
+            break;
+    }
+    return resultat;
+}
+
+char* TcibleToString(Tcible c){
+    char* resultat;
+    switch((int) c){
+        case 0 :
+            resultat = "sol";
+            break;
+        case 1 :
+            resultat = "solEtAir";
+            break;
+        case 2 :
+            resultat = "air";
+            break;
+        default :
+            resultat = "inconnu";
+            break;
+    }
+    return resultat;
+}
+
+void printUnite(Tunite u){
+    printf("nom : %s ; cibleAttaquable : %s ; maposition : %s ; pointsDeVie: %d ; vitesseAttaque : %f ; degats : %d ; portee : %d ; vitessedeplacement : %f ; posX : %d ; posY : %d ; peutAttaquer : %d\n",
+           TuniteDuJeuToString(u.nom),TcibleToString(u.cibleAttaquable),TcibleToString(u.maposition),u.pointsDeVie,u.vitesseAttaque,u.degats,u.portee,u.vitessedeplacement,u.posX,u.posY,u.peutAttaquer);
+}
+
+void afficheTListePlayer(TListePlayer l){
+    if(listeVide(l)){
+        printf("Erreur afficheTListePlayer : la liste est vide\n");
+        return;
+    }
+    TListePlayer ptr = l;
+    while(!listeVide(ptr)){
+        printUnite(*ptr->pdata);
+        printf("\n");
+        ptr = ptr->suiv;
+    }
+}
