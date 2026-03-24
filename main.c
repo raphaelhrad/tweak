@@ -3,7 +3,6 @@
 
 #include "SDL.h"
 #include "maSDL.h"    //bibliothèque avec des fonctions d'affichage utilisant la SDL
-#include "towerdefend.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -14,36 +13,36 @@
 /*--------- Main ---------------------*/
 int main(int argc, char* argv[])
 {
-    TListePlayer l;
-    initListe(&l);
+    TplateauJeu test = AlloueTab2D(LARGEURJEU,HAUTEURJEU);
+    initPlateauAvecNULL(test,LARGEURJEU,HAUTEURJEU);
     Tunite u1 = {
-        .nom  = tourAir,
-        .cibleAttaquable = air,
-        .maposition = air,
+        .nom  = tourRoi,
+        .cibleAttaquable = solEtAir,
+        .maposition = sol,
         .pointsDeVie = 300,
         .vitesseAttaque = 2.1,
         .degats = 20,
         .portee = 3,
         .vitessedeplacement = 0.7,
-        .posX = 2,
-        .posY = 3,
+        .posX = 5,
+        .posY = 5,
         .peutAttaquer = 0
     };
     Tunite u2 = {
         .nom  = tourSol,
-        .cibleAttaquable = solEtAir,
+        .cibleAttaquable = sol,
         .maposition = sol,
         .pointsDeVie = 234,
         .vitesseAttaque = 2.1,
         .degats = 25,
-        .portee = 8,
+        .portee = 2,
         .vitessedeplacement = 0.7,
         .posX = 2,
-        .posY = 2,
+        .posY = 1,
         .peutAttaquer = 1
     };
     Tunite u3 = {
-        .nom  = gargouille,
+        .nom  = archer,
         .cibleAttaquable = solEtAir,
         .maposition = sol,
         .pointsDeVie = 150,
@@ -51,19 +50,14 @@ int main(int argc, char* argv[])
         .degats = 25,
         .portee = 8,
         .vitessedeplacement = 0.7,
-        .posX = 2,
-        .posY = 2,
+        .posX = 4,
+        .posY = 0,
         .peutAttaquer = 1
     };
-    l = AjoutEnTete(l,u1);
-    l = AjoutEnTete(l,u2);
-    l = AjoutEnTete(l,u3);
-    printf("Avant suppression\n");
-    printf("\n");
-    afficheTListePlayer(l);
-    printf("Apres suppression\n");
-    printf("\n");
-    l = supprimerUniteListe(l,u3);
-    afficheTListePlayer(l);
+    test[2][1] = &u2;
+    test[4][0] = &u3;
+    test[5][5] = &u1;
+    TListePlayer listeportee = quiEstAPortee(test,&u2);
+    afficheTListePlayer(listeportee);
     return 0;
 }

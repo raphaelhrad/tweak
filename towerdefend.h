@@ -65,17 +65,18 @@ Tunite *creeTourSol(int posx, int posy);
 Tunite *creeTourAir(int posx, int posy);
 Tunite *creeTourRoi(int posx, int posy);
 
-int CoordValideEnX(int calculCoord, int portee);
-int CoordValideEnY(int calculCoord, int portee);
+int CoordValideEnX(int calculCoord);
+int CoordValideEnY(int calculCoord);
+bool peutAttaquer(Tunite* UniteAttaquante, Tunite* UniteCible);
 /* fonctions du noyau que vous avez à coder
 
 Bool tourRoiDetruite(TListePlayer player);
 void PositionnePlayerOnPlateau(TListePlayer player, TplateauJeu jeu)
-
-TListePlayer quiEstAPortee(TplateauJeu jeu, Tunite *UniteAttaquante) ; //retourne la liste des cibles possibles
-Void combat(SDL_Surface *surface , Tunite * UniteAttaquante, Tunite * UniteCible);  //qui utilise dessineAttaque (de maSDL.h)
-
 */
+TListePlayer quiEstAPortee(TplateauJeu jeu, Tunite *UniteAttaquante) ; //retourne la liste des cibles possibles
+//Void combat(SDL_Surface *surface , Tunite * UniteAttaquante, Tunite * UniteCible);  //qui utilise dessineAttaque (de maSDL.h)
+
+
 
 Tunite *creeArcher(int posx, int posy);
 Tunite *creeGargouille(int posx, int posy);

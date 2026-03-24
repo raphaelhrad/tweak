@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "SDL.h"
-#include "towerdefend.h"
 #include "listeChainee.h"
+#include "towerdefend.h"
 
 
 //typedef Tunite* ** TplateauJeu;
@@ -155,32 +155,85 @@ bool tourRoiDetruite(TListePlayer playerRoi){
  //sinon : false
 }
 
-int CoordValideEnX(int calculCoord, int portee){
+int CoordValideEnX(int calculCoord){
     if(calculCoord < 0){ return 0; }
     if(calculCoord > LARGEURJEU - 1){ return LARGEURJEU - 1; }
     return calculCoord;
 }
 
-int CoordValideEnY(int calculCoord, int portee){
+int CoordValideEnY(int calculCoord){
     if(calculCoord < 0){ return 0; }
     if(calculCoord > HAUTEURJEU - 1){ return HAUTEURJEU - 1; }
     return calculCoord;
 }
 
+
+
+bool peutAttaquer(Tunite* UniteAttaquante, Tunite* UniteCible){
+    if(UniteAttaquante == NULL || UniteCible == NULL){
+        return false;
+    }
+    if(UniteAttaquante->nom == chevalier || UniteAttaquante->nom == archer || UniteAttaquante->nom == dragon || UniteAttaquante->nom == gargouille){
+        if(UniteCible->nom == tourRoi){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    else if(UniteAttaquante->nom == tourRoi){
+        if(UniteCible->nom == tourAir || UniteCible->nom == tourSol){
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+    else if(UniteAttaquante->nom == tourAir){
+        if(UniteCible->maposition == air && UniteCible->nom != tourAir){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    else{
+        if(UniteCible->maposition == sol && UniteCible->nom != tourSol && UniteCible->nom != tourRoi){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+}
+
 TListePlayer quiEstAPortee(TplateauJeu jeu, Tunite *UniteAttaquante){
     TListePlayer listePortee;
-    TListePlayer = initListe(*listePortee);
+    initListe(&listePortee);
     //Calcul coordonnées
-    int posxD = CoordValideEnX(UniteAttaquante.posX - UniteAttaquante.portee);
-    int posyD = CoordValideEnY(UniteAttaquante.posY - UniteAttaquante.portee);
-    int posxF = CoordValideEnX(UniteAttaquante.posX + UniteAttaquante.portee);
-    int posyF = CoordValideEnY(UniteAttaquante.posY + UniteAttaquante.portee);
+    int posxD = CoordValideEnX(UniteAttaquante->posX - UniteAttaquante->portee);
+    int posyD = CoordValideEnY(UniteAttaquante->posY - UniteAttaquante->portee);
+    int posxF = CoordValideEnX(UniteAttaquante->posX + UniteAttaquante->portee);
+    int posyF = CoordValideEnY(UniteAttaquante->posY + UniteAttaquante->portee);
+    printf("coordD = (%d,%d), coordF = (%d,%d)\n",posxD,posyD,posxF,posyF); // A garder pour les tests
     //Parcours du tableau pour chercher les unités à portée
-    /* - si l'unite fait partie de la horde alors alors que l'unité attaquante est de la horde on l'ignore
+    /* - si l'unite fait partie de la horde alors que l'unité attaquante est de la horde on l'ignore
        - si l'unite est une tour du roi alors on l'ignore
        - Toutes les cibles ne sont pas attaquables, bien vérifier que l'unite attaquante peut attaquer l'unité à portée
     */
+    for(int largeur = posxD ; largeur <= posxF; largeur++){
+        for(int hauteur = posyD; hauteur <= posyF; hauteur++){
+            Tunite* UniteCible = jeu[largeur][hauteur];
+            if(largeur == UniteAttaquante->posX && hauteur == UniteAttaquante->posY){ //Peut-être mieux de dire de ne pas attaquer la case ou se trouve l'unité attaquante
+                continue;
+            }
+            if(peutAttaquer(UniteAttaquante,UniteCible)){
+                listePortee = AjoutEnTete(listePortee,*UniteCible);
+            }
+        }
+    }
     //Tri de la liste selon le nombre de points de vie
+    tri_selection_liste(listePortee,comparaisonPDVAinfB);
     return listePortee;
 }
 
