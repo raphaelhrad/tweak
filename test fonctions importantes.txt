@@ -1,3 +1,5 @@
+Fonction quiEstAPortee : 
+
 test 1 : (sans débordement)
 
 uniteAttaquante = (4,6)
@@ -15,3 +17,11 @@ uniteCible = (4,0)
 uniteNonCible = (5,5)
 
 test réussi 
+
+Fonction combat : 
+
+tourRoi = (3,7)
+gargouille = (3,6)
+TlistePlayer listeRoi = tourRoi, tourSol
+
+test réussi

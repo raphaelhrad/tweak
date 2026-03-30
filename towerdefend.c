@@ -149,10 +149,34 @@ void affichePlateauConsole(TplateauJeu jeu, int largeur, int hauteur){
 
 //Combat
 
+bool UniteRoiPresente(TListePlayer playerRoi){
+    if(listeVide(playerRoi)){
+        printf("Erreur UniteRoiPresente : La liste est vide\n");
+        return false;
+    }
+    TListePlayer ptr = playerRoi;
+    while(!listeVide(ptr)){
+        Tunite *currentUnite = ptr->pdata;
+        if(currentUnite->nom == tourRoi){
+            return true;
+        }
+        ptr = ptr->suiv;
+    }
+    return false;
+}
+
 bool tourRoiDetruite(TListePlayer playerRoi){
- //récupérer le roi dans la liste
- //s'il a été supprimé : true
- //sinon : false
+    //récupérer le roi dans la liste
+    //s'il a été supprimé : true
+    //sinon : false
+    if(UniteRoiPresente(playerRoi)){
+        printf("Tour du Roi toujours presente\n");
+        return false;
+    }
+    else{
+        printf("Tour du Roi detruite\n");
+        return true;
+    }
 }
 
 int CoordValideEnX(int calculCoord){
@@ -210,12 +234,11 @@ bool peutAttaquer(Tunite* UniteAttaquante, Tunite* UniteCible){
 TListePlayer quiEstAPortee(TplateauJeu jeu, Tunite *UniteAttaquante){
     TListePlayer listePortee;
     initListe(&listePortee);
-    //Calcul coordonnées
+    //Calcul coordonnées (il faudra changer le début et la fin en regardant le schéma dans le pdf)
     int posxD = CoordValideEnX(UniteAttaquante->posX - UniteAttaquante->portee);
     int posyD = CoordValideEnY(UniteAttaquante->posY - UniteAttaquante->portee);
     int posxF = CoordValideEnX(UniteAttaquante->posX + UniteAttaquante->portee);
     int posyF = CoordValideEnY(UniteAttaquante->posY + UniteAttaquante->portee);
-    printf("coordD = (%d,%d), coordF = (%d,%d)\n",posxD,posyD,posxF,posyF); // A garder pour les tests
     //Parcours du tableau pour chercher les unités à portée
     /* - si l'unite fait partie de la horde alors que l'unité attaquante est de la horde on l'ignore
        - si l'unite est une tour du roi alors on l'ignore
@@ -228,7 +251,7 @@ TListePlayer quiEstAPortee(TplateauJeu jeu, Tunite *UniteAttaquante){
                 continue;
             }
             if(peutAttaquer(UniteAttaquante,UniteCible)){
-                listePortee = AjoutEnTete(listePortee,*UniteCible);
+                listePortee = AjoutEnTeteV2(listePortee,UniteCible);
             }
         }
     }
@@ -242,7 +265,7 @@ bool comparaisonPDVAinfB(Tunite UniteA, Tunite UniteB){
     return UniteA.pointsDeVie < UniteB.pointsDeVie;
 }
 
-bool comparaisonUniteAegaleB(Tunite UniteA, Tunite UniteB){
+bool comparaisonUniteAegaleB(Tunite UniteA, Tunite UniteB){ // Il faut faire très attention avec l'utilisation de cette fonction car elle ne vérifie pas si les deux unités sont valides
     return (UniteA.nom == UniteB.nom)
         && (UniteA.cibleAttaquable == UniteB.cibleAttaquable)
         && (UniteA.maposition == UniteB.maposition)
@@ -261,14 +284,32 @@ Tunite* premierElementTListePlayer(TListePlayer listeUnites){
 }
 
 void supprimerUnite(TListePlayer *player, Tunite *UniteDetruite, TplateauJeu jeu){
-    //Si PDV inf ou égal 0, alors suppression dans liste player et sur plateau
-    //Si Tunite est dernière unité de joueur, alors liste = NULL
+    // Récupération des coordonnées de l'unité détruite
+    int coordxUnite = UniteDetruite->posX, coordyUnite = UniteDetruite->posY;
+    // Retirer le pointeur vers cette unité dans le plateau de jeu
+    jeu[coordxUnite][coordyUnite] = NULL;
+    //Retirer l'unité de la liste du joueur
+    *player = supprimerUniteListe(*player,*UniteDetruite);
 }
 
-void combat(SDL_Surface *surface, Tunite *UniteAttaquante, Tunite *UniteCible){
-    //Soustraction des dégats sur UniteCible
+
+/** (C'est un commentaire de doc mais c'est super important que je le vois)
+Attention, dans la fonction AjoutEnTete, je n'ajoute que des copies d'unités.
+Or lorsqu'une modification a besoin de se transmettre sur l'ensemble des entités pointant l'unité en question,
+toute unité ayant utilisée cette méthode ne pointe pas vers l'unité originale mais vers une copie. Dans cette fonction, les modification
+effectuées sur les points de vies de l'unité cible n'était pas visible par listeplayer car dans listeUniteCible, c'est une copie de l'unité
+originale donc aucun impact sur l'originale. C'est pourquoi j'ai crée la fonction AjoutEnTeteV2 qui prend un pointeur sur Tunite et non pas
+un Tunite */
+void combat(Tunite *UniteAttaquante, TListePlayer *listeplayer, TplateauJeu jeu){
     //Attaque de UniteAttaquante soustraite à PV d'UniteCible
-    //Si 0 ou moins PDV : supprimerUnite
+    //Soustraction des dégats sur UniteCible
+    TListePlayer listeUniteCible = quiEstAPortee(jeu,UniteAttaquante);
+    Tunite *UniteCible = premierElementTListePlayer(listeUniteCible);
+    UniteCible->pointsDeVie = UniteCible->pointsDeVie - UniteAttaquante->degats;
+    if(UniteCible->pointsDeVie <= 0){
+        //Si 0 ou moins PDV : supprimerUnite
+        supprimerUnite(listeplayer,UniteCible,jeu);
+    }
 }
 
 //Déplacement

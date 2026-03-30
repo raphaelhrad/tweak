@@ -30,6 +30,21 @@ TListePlayer AjoutEnTete(TListePlayer l, Tunite data){
     return l;
 }
 
+TListePlayer AjoutEnTeteV2(TListePlayer l, Tunite *data){
+    T_cell* newcell = (T_cell*) malloc(sizeof(T_cell));
+    if(listeVide(l)){
+        newcell->suiv = NULL;
+        newcell->pdata = data;
+        l = newcell;
+        return l;
+    }
+    TListePlayer temp = l;
+    newcell->suiv = temp;
+    newcell->pdata = data;
+    l = newcell;
+    return l;
+}
+
 TListePlayer supprimerUniteListe(TListePlayer l, Tunite unite){
     if(listeVide(l)){
         printf("Erreur supprimerUniteListe : la liste est vide\n");
@@ -73,3 +88,5 @@ void tri_selection_liste(TListePlayer l, bool (*fcomp)(Tunite a, Tunite b)){
         i = i->suiv;
     }
 }
+
+

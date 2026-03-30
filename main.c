@@ -13,51 +13,20 @@
 /*--------- Main ---------------------*/
 int main(int argc, char* argv[])
 {
-    TplateauJeu test = AlloueTab2D(LARGEURJEU,HAUTEURJEU);
-    initPlateauAvecNULL(test,LARGEURJEU,HAUTEURJEU);
-    Tunite u1 = {
-        .nom  = tourRoi,
-        .cibleAttaquable = solEtAir,
-        .maposition = sol,
-        .pointsDeVie = 300,
-        .vitesseAttaque = 2.1,
-        .degats = 20,
-        .portee = 3,
-        .vitessedeplacement = 0.7,
-        .posX = 5,
-        .posY = 5,
-        .peutAttaquer = 0
-    };
-    Tunite u2 = {
-        .nom  = tourSol,
-        .cibleAttaquable = sol,
-        .maposition = sol,
-        .pointsDeVie = 234,
-        .vitesseAttaque = 2.1,
-        .degats = 25,
-        .portee = 2,
-        .vitessedeplacement = 0.7,
-        .posX = 2,
-        .posY = 1,
-        .peutAttaquer = 1
-    };
-    Tunite u3 = {
-        .nom  = archer,
-        .cibleAttaquable = solEtAir,
-        .maposition = sol,
-        .pointsDeVie = 150,
-        .vitesseAttaque = 2.1,
-        .degats = 25,
-        .portee = 8,
-        .vitessedeplacement = 0.7,
-        .posX = 4,
-        .posY = 0,
-        .peutAttaquer = 1
-    };
-    test[2][1] = &u2;
-    test[4][0] = &u3;
-    test[5][5] = &u1;
-    TListePlayer listeportee = quiEstAPortee(test,&u2);
-    afficheTListePlayer(listeportee);
+    // Test fonction combat
+    Tunite* gargouilleTest = creeGargouille(3,6);
+    Tunite* tourRoiTest = creeTourRoi(3,7);
+    Tunite* tourSolTest = creeTourSol(2,5);
+    TplateauJeu jeu = AlloueTab2D(LARGEURJEU,HAUTEURJEU);
+    initPlateauAvecNULL(jeu,LARGEURJEU,HAUTEURJEU);
+    TListePlayer listeRoi;
+    initListe(&listeRoi);
+    jeu[3][6] = gargouilleTest;
+    jeu[3][7] = tourRoiTest;
+    jeu[2][5] = tourSolTest;
+    listeRoi = AjoutEnTeteV2(listeRoi,tourRoiTest);
+    listeRoi = AjoutEnTeteV2(listeRoi,tourSolTest);
+    combat(gargouilleTest,&listeRoi,jeu);
+    tourRoiDetruite(listeRoi);
     return 0;
 }
