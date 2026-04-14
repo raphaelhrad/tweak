@@ -2,7 +2,6 @@
 #define TOWERDEFEND_H_INCLUDED
 
 #include <stdbool.h>
-
 #define LARGEURJEU 11
 #define HAUTEURJEU 19
 #define NBCOORDPARCOURS 34
@@ -29,13 +28,11 @@ typedef struct {
                             //seule fois par tour ;
                             //0 = a déjà attaqué, 1 = peut attaquer ce tour-ci
                             // à remettre à 1 au début de chaque tour
-
-    //struct Tunite *cible;   //NULL si pas de cible. mettre à jour ce pointeur permet l'aninamtion (simpliste certe) du tir
-    //non utilisé au final -> utiliser directement dessineAttaque
-
     //int score_emplacement;  //un clin d'oeil pour suscister une idée de tri
 } Tunite;
 
+
+// Liste chainée pour le type Tunite
 typedef struct T_cell {
     struct T_cell *suiv;
     Tunite *pdata;
@@ -43,11 +40,23 @@ typedef struct T_cell {
 
 typedef T_cell *TListePlayer;
 
+// Liste chainée pour le type Tcoord
+typedef struct {
+    int posX;
+    int posY;
+    int score_emplacement;
+} Tcoord;
+
+typedef struct {
+    struct T_cellCoord *next;
+    Tcoord *val;
+} T_cellCoord;
+
+typedef T_cellCoord *TListeCoord;
+
+
 
 typedef Tunite* ** TplateauJeu;  ////tableau a deux dimensions de largeur 11 et hauteur 19 contenant des pointeurs (Tunite*)
-
-
-
 
 TplateauJeu AlloueTab2D(int largeur, int hauteur);
 void afficheCoordonneesParcours(int **t, int nbcoord);
@@ -71,14 +80,16 @@ bool peutAttaquer(Tunite* UniteAttaquante, Tunite* UniteCible);
 
 bool UniteRoiPresente(TListePlayer playerRoi);
 bool tourRoiDetruite(TListePlayer player);
+
+int ProchaineCaseChemin(int** chemin, Tunite* Unite);
+void avancerUnite(Tunite* Unite, TplateauJeu jeu, int** chemin);
 /* fonctions du noyau que vous avez à coder
 
-void PositionnePlayerOnPlateau(TListePlayer player, TplateauJeu jeu)
+void PositionnePlayerOnPlateau(TListePlayer player, TplateauJeu jeu);
 */
 TListePlayer quiEstAPortee(TplateauJeu jeu, Tunite *UniteAttaquante) ; //retourne la liste des cibles possibles
-void combat(Tunite *UniteAttaquante, TListePlayer *listeplayer, TplateauJeu jeu); //qui utilise dessineAttaque (de maSDL.h)
 
-
+int NbCaseCheminAPortee(int posX, int posY, int portee, int** chemin);
 
 Tunite *creeArcher(int posx, int posy);
 Tunite *creeGargouille(int posx, int posy);

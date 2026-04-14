@@ -14,7 +14,7 @@
 int main(int argc, char* argv[])
 {
     // Test fonction combat
-    Tunite* gargouilleTest = creeGargouille(3,6);
+    /*Tunite* gargouilleTest = creeGargouille(3,6);
     Tunite* tourRoiTest = creeTourRoi(3,7);
     Tunite* tourSolTest = creeTourSol(2,5);
     TplateauJeu jeu = AlloueTab2D(LARGEURJEU,HAUTEURJEU);
@@ -24,9 +24,16 @@ int main(int argc, char* argv[])
     jeu[3][6] = gargouilleTest;
     jeu[3][7] = tourRoiTest;
     jeu[2][5] = tourSolTest;
-    listeRoi = AjoutEnTeteV2(listeRoi,tourRoiTest);
-    listeRoi = AjoutEnTeteV2(listeRoi,tourSolTest);
+    listeRoi = AjoutEnTete(listeRoi,tourRoiTest);
+    listeRoi = AjoutEnTete(listeRoi,tourSolTest);
     combat(gargouilleTest,&listeRoi,jeu);
-    tourRoiDetruite(listeRoi);
+    tourRoiDetruite(listeRoi);*/
+
+
+    int** chemin = initChemin();
+    int result = NbCaseCheminAPortee(4,1,2,chemin);
+    printf("Nombre de cases a portee : %d\n",result);
+
+
     return 0;
 }
