@@ -114,6 +114,10 @@ char* TcibleToString(Tcible c);
 void printUnite(Tunite u);
 void afficheTListePlayer(TListePlayer l);
 void positionnePlayerOnPlateau(TListePlayer player, TplateauJeu jeu);
-void sauvegarderPartieSequentiel(TListePlayer listeRoi, TListePlayer listeHorde);
-void chargerPartieSequentiel(TListePlayer *listeRoi, TListePlayer *listeHorde, char* nomFichier);
+
+int compterUnites(TListePlayer liste);
+void sauvegarderPartieSequentiel(TListePlayer listeRoi, TListePlayer listeHorde, int** chemin);
+void chargerPartieSequentiel(TListePlayer *listeRoi, TListePlayer *listeHorde, int** chemin, TplateauJeu jeu);
+void sauvegarderPartieBinaire(TListePlayer listeRoi, TListePlayer listeHorde, int** chemin);
+void chargerPartieBinaire(TListePlayer *listeRoi, TListePlayer *listeHorde, int** chemin, TplateauJeu jeu);
 #endif // TOWERDEFEND_H_INCLUDED

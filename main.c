@@ -54,8 +54,8 @@ int main(int argc, char* argv[])
         maj_fenetre(pWindow);
 
         //A COMMENTER quand vous en aurez assez de cliquer sur ces popups ^^
-        message("Welcome in TowerDfend","Ceci est un point de depart pour votre future interface de votre jeu TowerDefend");
-        message("et fin","ECHAP->quitter, S/C ET D/V les gerer les sauvegardes");
+        message("Welcome in TowerDefend","Bienvenue dans TowerDefend !");
+        message("Commandes importantes","ECHAP->quitter, S/C ET D/V pour gérer les sauvegardes. Bon jeu !");
 
         /**********************************************************************/
         /* DEFINISSEZ/INITIALISER ICI VOS VARIABLES              */
@@ -64,7 +64,6 @@ int main(int argc, char* argv[])
         TListePlayer listeRoi = initRoi();
 
         // Ajout de la Tour du Roi initiale à la fin du chemin
-        // (tabParcours[NBCOORDPARCOURS-1] est la dernière case du chemin)
         Tunite* roiInitial = creeTourRoi(tabParcours[NBCOORDPARCOURS-1][X], tabParcours[NBCOORDPARCOURS-1][Y]);
         // Dans towerdefend.c, vous avez ajouté ajouterUnite(&listeRoi, roiInitial)
         listeRoi = AjoutEnTete(listeRoi, roiInitial);
@@ -74,42 +73,51 @@ int main(int argc, char* argv[])
 
         // boucle principale du jeu
         int cont = 1;
+        int cpt = 0; //Compteur pour que les tours apparaissent à un ratio plus faible
         while ( cont != 0 ){
                 SDL_PumpEvents(); //do events
                 efface_fenetre(pWinSurf);
 
                 /***********************************************************************/
-                /* */
-                //APPELEZ ICI VOS FONCTIONS QUI FONT EVOLUER LE JEU
 
-                // On vide le plateau virtuel pour le reconstruire
+                // On vide le plateau pour le reconstruire
                 initPlateauAvecNULL(jeu, LARGEURJEU, HAUTEURJEU);
 
                 positionnePlayerOnPlateau(listeHorde, jeu);
                 positionnePlayerOnPlateau(listeRoi, jeu);
 
-                // Création de nouvelles unités
+                // Création des unités
                 creationUniteAleatoireHorde(&listeHorde, tabParcours);
-                creationUniteAleatoireRoi(&listeRoi, tabParcours, jeu);
+                if (cpt % 10 == 0){
+                    creationUniteAleatoireRoi(&listeRoi, tabParcours, jeu);
+                }
+
+                //Bug pour la fonction dessinerAttaque, on a été obligé de mettre la fonction ici
+                prepareAllSpriteDuJeu(jeu,tabParcours,LARGEURJEU,HAUTEURJEU,TabSprite,pWinSurf);
+
+                //Il faut que les unités puissent attaquer
+
+                TListePlayer current = listeRoi;
+                while (current != NULL) {
+                    current->pdata->peutAttaquer = 1;
+                    current = current->suiv;
+                }
+
+                current = listeHorde;
+                while (current != NULL) {
+                    current->pdata->peutAttaquer = 1;
+                    current = current->suiv;
+                }
 
                 // Déplacement horde
+
                 TListePlayer ptrHorde = listeHorde;
                 while(!listeVide(ptrHorde)){
                     avancerUnite(ptrHorde->pdata, jeu, tabParcours);
                     ptrHorde = ptrHorde->suiv;
                 }
 
-                TListePlayer cur = listeRoi;
-                while (cur != NULL) {
-                    cur->pdata->peutAttaquer = 1;
-                    cur = cur->suiv;
-                }
-
-                cur = listeHorde;
-                while (cur != NULL) {
-                    cur->pdata->peutAttaquer = 1;
-                    cur = cur->suiv;
-                }
+                //Phase de combat
 
                 TListePlayer ptrRoi = listeRoi;
                 while (ptrRoi != NULL) {
@@ -118,7 +126,7 @@ int main(int argc, char* argv[])
                 }
 
                 ptrHorde = listeHorde;
-                while (ptrHorde != NULL){
+                while (ptrHorde != NULL) {
                     combat(pWinSurf, ptrHorde->pdata, &listeRoi, jeu);
                     ptrHorde = ptrHorde->suiv;
                 }
@@ -126,41 +134,40 @@ int main(int argc, char* argv[])
                 //Fin de la partie
                 if(tourRoiDetruite(listeRoi)) {
                     cont = 0;
-                    message("Fin de la partie","La tour du Roi est detruite ! Fin de la partie.\n");
+                    message("Merci d'avoir joué !","La tour du Roi est detruite ! Fin de la partie.");
                 }
 
-                /* FIN DE VOS APPELS                                                   */
+                cpt++;
                 /***********************************************************************/
 
                 //affichage du jeu à chaque tour (avec les nouvelles positions)
-                prepareAllSpriteDuJeu(jeu,tabParcours,LARGEURJEU,HAUTEURJEU,TabSprite,pWinSurf);
                 maj_fenetre(pWindow);
-                SDL_Delay(1000);  // Régler le délai
+                SDL_Delay(500);  // Régler le délai
 
 
                 //LECTURE DE CERTAINES TOUCHES POUR LANCER LES RESTAURATIONS ET SAUVEGARDES
                 const Uint8* pKeyStates = SDL_GetKeyboardState(NULL);
                 if ( pKeyStates[SDL_SCANCODE_V] ){
                         // CHARGER SÉQUENTIEL (TEXTE)
-                        //chargerPartieSequentiel(&listeRoi, &listeHorde, "partieseq.tds");
+                        chargerPartieSequentiel(&listeRoi, &listeHorde, tabParcours, jeu);
                         printf("Chargement sequentiel...\n");
                         SDL_Delay(300);
                 }
                 if ( pKeyStates[SDL_SCANCODE_C] ){
                         // CHARGER BINAIRE
-                        //chargerPartieBinaire(&listeRoi, &listeHorde, "partiebin.tdb");
+                        chargerPartieBinaire(&listeRoi, &listeHorde, tabParcours, jeu);
                         printf("Chargement binaire...\n");
                         SDL_Delay(300);
                 }
                 if ( pKeyStates[SDL_SCANCODE_D] ){
                         // SAUVEGARDER SÉQUENTIEL (TEXTE)
-                        //sauvegarderPartieSequentiel(listeRoi, listeHorde);
+                        sauvegarderPartieSequentiel(listeRoi, listeHorde, tabParcours);
                         printf("Sauvegarde sequentielle effectuee !\n");
                         SDL_Delay(300);
                 }
                 if ( pKeyStates[SDL_SCANCODE_S] ){
                         // SAUVEGARDER BINAIRE
-                        //sauvegarderPartieBinaire(listeRoi, listeHorde, "partiebin.tdb");
+                        sauvegarderPartieBinaire(listeRoi, listeHorde, tabParcours);
                         printf("Sauvegarde binaire effectuee !\n");
                         SDL_Delay(300);
                 }

@@ -37,15 +37,7 @@ TListePlayer initHorde(){
     return ListeHorde;
 }
 
-/*
-void ecritCheminVersleHaut  : permet d'initilaiser le tab chemin de distance cases (avec des coord x y) dans une direction, à partir d'un point x y donné
-
-int **chemin  : tab de coordonnées x y du chemin
-int *ichemin  : indice de la case du chemin d'où on part
-int *xdepart, int *ydepart : valeur en x y de départ pouri la premiere case
-int distance  : distance sur laquelle on va écrire des coordonnées dans le tab chemin
-int *distanceMaxRestante : securité pour ne pas sortir de la plage d'indice de chemin
-*/
+//permet d'initilaiser le tab chemin de distance cases (avec des coord x y) dans une direction, à partir d'un point x y donné
 void ecritCheminVersleHaut(int **chemin, int *ichemin, int *xdepart, int *ydepart, int distance, int *distanceMaxRestante){
     if ((*distanceMaxRestante - distance)>=0){
         int y;
@@ -58,6 +50,7 @@ void ecritCheminVersleHaut(int **chemin, int *ichemin, int *xdepart, int *ydepar
     }
     else printf("erreur longueur chemin\n");
 }
+
 void ecritCheminVerslaDroite(int **chemin, int *ichemin, int *xdepart, int *ydepart, int distance, int *distanceMaxRestante){
     if ((*distanceMaxRestante - distance)>=0){
         int x;
@@ -70,6 +63,7 @@ void ecritCheminVerslaDroite(int **chemin, int *ichemin, int *xdepart, int *ydep
     }
     else printf("erreur longueur chemin\n");
 }
+
 void ecritCheminVerslaGauche(int **chemin, int *ichemin, int *xdepart, int *ydepart, int distance, int *distanceMaxRestante){
     if ((*distanceMaxRestante - distance)>=0){
         int x;
@@ -83,29 +77,51 @@ void ecritCheminVerslaGauche(int **chemin, int *ichemin, int *xdepart, int *ydep
     else printf("erreur longueur chemin\n");
 }
 
-int **initChemin(){
+int** initChemin() {
+    //Allocation de la mémoire pour le tableau 2D
     int **chemin = (int**)malloc(sizeof(int*)*NBCOORDPARCOURS);
-
-    for (int j=0;j<NBCOORDPARCOURS;j++){
-        chemin[j] = (int*)malloc(sizeof(int)*2);  //2 cases :indice 0 pour la coord en X, indice 1 pour la coord en Y
+    for (int i = 0; i < NBCOORDPARCOURS; i++) {
+        chemin[i] = (int*)malloc(sizeof(int)*2);
     }
 
-    int ydepart = 18;  //et non 19
-    int xdepart = 5;  //5 = milieu de la fenetre de 11 de largeur (0-10)
-    int i = 0;  //parcourt les i cases du chemin
-    int distanceMaxRestante = NBCOORDPARCOURS;
+    //On commence toujours au centre
+    int x = LARGEURJEU / 2; // = 5
+    int y = HAUTEURJEU - 1; // = 18
+    int dirActuelle = 0;    // 0 = haut, 1 = gauche, 2 = droite
 
-    ecritCheminVersleHaut(chemin, &i, &xdepart, &ydepart, 3, &distanceMaxRestante);
-    ecritCheminVerslaDroite(chemin, &i, &xdepart, &ydepart, 4, &distanceMaxRestante);
-    ecritCheminVersleHaut(chemin, &i, &xdepart, &ydepart, 4, &distanceMaxRestante);
-    ecritCheminVerslaGauche(chemin, &i, &xdepart, &ydepart, 5, &distanceMaxRestante);
-    ecritCheminVersleHaut(chemin, &i, &xdepart, &ydepart, 4, &distanceMaxRestante);
-    ecritCheminVerslaDroite(chemin, &i, &xdepart, &ydepart, 4, &distanceMaxRestante);
-    ecritCheminVersleHaut(chemin, &i, &xdepart, &ydepart, 3, &distanceMaxRestante);
-    ecritCheminVerslaGauche(chemin, &i, &xdepart, &ydepart, 4, &distanceMaxRestante);
-    ecritCheminVersleHaut(chemin, &i, &xdepart, &ydepart, 3, &distanceMaxRestante);
+    chemin[0][X] = x;
+    chemin[0][Y] = y;
 
-    return chemin;  //tab2D contenant des pointeurs
+    for(int i = 1; i < NBCOORDPARCOURS; i++) {
+        int proba = rand() % 100;
+
+        //Monter
+        if (proba < 50 && y > 0) {
+            y--;
+            dirActuelle = 0;
+        }
+        // Gauche si on est pas allés à droite avant
+        else if (proba < 75 && x > 0 && dirActuelle != 2) {
+            x--;
+            dirActuelle = 1;
+        }
+        // Droite si on est pas allés à gauche précedemment
+        else if (x < LARGEURJEU - 1 && dirActuelle != 1) {
+            x++;
+            dirActuelle = 2;
+        }
+        // S'il y a blocage on va forcer à aller en haut
+        else if (y > 0) {
+            y--;
+            dirActuelle = 0;
+        }
+
+        // on sauvegarde bien les novuelles coordonnées
+        chemin[i][X] = x;
+        chemin[i][Y] = y;
+    }
+
+    return chemin;
 }
 
 void afficheCoordonneesParcours(int **chemin, int nbcoord){
@@ -140,16 +156,6 @@ void affichePlateauConsole(TplateauJeu jeu, int largeur, int hauteur){
     }
 }
 
-
-/*
-à vérifier derniereCaseChemin(int** chemin){
-    à utiliser pour la création de la tour du roi
-}
-*/
-
-
-/** !! A chaque tour on reconstruit le plateau de jeu, ainsi les fonctions ne modifie que l'unité et la liste du joueur, le plateau sera recrée grâce aux listes modifiées des deux joueurs !! */
-
 //Combat
 
 bool UniteRoiPresente(TListePlayer playerRoi){
@@ -161,6 +167,7 @@ bool UniteRoiPresente(TListePlayer playerRoi){
     while(!listeVide(ptr)){
         Tunite *currentUnite = ptr->pdata;
         if(currentUnite->nom == tourRoi){
+            printf("pv roi : %d", currentUnite->pointsDeVie);
             return true;
         }
         ptr = ptr->suiv;
@@ -193,8 +200,6 @@ int CoordValideEnY(int calculCoord){
     if(calculCoord > HAUTEURJEU - 1){ return HAUTEURJEU - 1; }
     return calculCoord;
 }
-
-
 
 bool peutAttaquer(Tunite* UniteAttaquante, Tunite* UniteCible){
     if(UniteAttaquante == NULL || UniteCible == NULL){
@@ -301,14 +306,13 @@ void combat(SDL_Surface *surface, Tunite *UniteAttaquante, TListePlayer *listepl
     TListePlayer listeUniteCible = quiEstAPortee(jeu,UniteAttaquante);
     if (listeUniteCible != NULL){
         Tunite *UniteCible = premierElementTListePlayer(listeUniteCible);
-        dessineAttaque(surface,UniteAttaquante,UniteCible);
         UniteCible->pointsDeVie = UniteCible->pointsDeVie - UniteAttaquante->degats;
         if(UniteCible->pointsDeVie <= 0){
             //Si 0 ou moins PDV : supprimerUnite
             supprimerUnite(listeplayer,UniteCible,jeu);
         }
+        dessineAttaque(surface,UniteAttaquante,UniteCible);
     }
-
 }
 
 //Déplacement
@@ -323,13 +327,10 @@ int ProchaineCaseChemin(int** chemin, Tunite* Unite){
         indexCase++;
     }
     if(indexCase > 0 && indexCase < NBCOORDPARCOURS - 1){
-        return indexCase + 1; //Case suivante du tableau chemin
+        return indexCase; //Case suivante du tableau chemin
     }
     if(indexCase == NBCOORDPARCOURS - 1){
-        return indexCase; // C'est la dernière case donc on renvoie la même car il n'y a pas de case suivante
-    }
-    else{
-        return indexCase; // Il faut faire de la gestion d'erreur
+        return indexCase - 1; // C'est la dernière case donc on renvoie -1 pour y être car il n'y a pas de case suivante
     }
 }
 
@@ -338,6 +339,7 @@ void avancerUnite(Tunite* Unite, TplateauJeu jeu, int** chemin){
     int coordXCaseSuiv = chemin[caseSuiv][X];
     int coordYCaseSuiv = chemin[caseSuiv][Y];
     if(jeu[coordXCaseSuiv][coordYCaseSuiv] == NULL){ // Si aucune autre unité de la horde se trouve sur la prochaine case alors on peut avancer l'unité
+        jeu[Unite->posX][Unite->posY] = NULL;
         Unite->posX = coordXCaseSuiv;
         Unite->posY = coordYCaseSuiv;
         jeu[coordXCaseSuiv][coordYCaseSuiv] = Unite;
@@ -347,7 +349,6 @@ void avancerUnite(Tunite* Unite, TplateauJeu jeu, int** chemin){
 Tcoord TrouverMeilleurEmplacement(TplateauJeu jeu, int** chemin, int portee) {
     Tcoord meilleur = {-1, -1, -1};
     int meilleurScore = -1;
-
     for(int i = 0; i < LARGEURJEU; i++){
         for(int j = 0; j < HAUTEURJEU; j++){
             // Il faut vérifier que la case est bien  vide
@@ -367,7 +368,6 @@ Tcoord TrouverMeilleurEmplacement(TplateauJeu jeu, int** chemin, int portee) {
 }
 
 //Création
-
 
 void ajouterUnite(TListePlayer *player, Tunite *nouvelleUnite){
     *player = AjoutEnTete(*player,nouvelleUnite);
@@ -390,40 +390,20 @@ int NbCaseCheminAPortee(int posX, int posY, int portee, int** chemin){
     return cpt;
 }
 
-/*TListe EmplacementTourRoi(int largeur, int hauteur, int portee, int** chemin){
-    TListe listeEmplacement = NULL;
-    for(int i = 0; i < largeur; i++){
-        for(int j = 0; j < hauteur; j++){
-            int nbCase = NbCaseCheminAPortee(i,j,portee,chemin);
-            if(nbCase > 0){
-                // Tcoord* data = malloc(sizeof(Tcoord));
-                // data->posX = i;
-                // data->posY = j;
-                // data->score_emplacement = nbCase;
-                // listeEmplacement = AjoutEnTete(listeEmplacement,data);
-            }
-        }
-    }
-    return listeEmplacement;
-}*/
-
 void creationUniteAleatoireRoi(TListePlayer *listeRoi, int** chemin, TplateauJeu jeu){
-    int proba = rand() % 100;
     Tunite *nouv = NULL;
     int porteeTest = 3; // Portée moyenne pour tester l'emplacement
 
     // Tour Sol : 40%, Tour Air : 40%, Aucune : 20%
-    if(proba < 80) {
-        Tcoord meilleurSpot = TrouverMeilleurEmplacement(jeu, chemin, porteeTest);
-        if(meilleurSpot.posX != -1 && meilleurSpot.posY != -1) {
-            if(proba < 40) {
-                nouv = creeTourSol(meilleurSpot.posX, meilleurSpot.posY);
-            } else {
-                nouv = creeTourAir(meilleurSpot.posX, meilleurSpot.posY);
-            }
-            ajouterUnite(listeRoi, nouv);
-            jeu[meilleurSpot.posX][meilleurSpot.posY] = nouv; // Met à jour pour ne pas superposer
+    Tcoord meilleurSpot = TrouverMeilleurEmplacement(jeu, chemin, porteeTest);
+    if(meilleurSpot.posX != -1 && meilleurSpot.posY != -1) {
+        if(rand() % 2 == 0) {
+            nouv = creeTourSol(meilleurSpot.posX, meilleurSpot.posY);
+        } else {
+            nouv = creeTourAir(meilleurSpot.posX, meilleurSpot.posY);
         }
+        ajouterUnite(listeRoi, nouv);
+        jeu[meilleurSpot.posX][meilleurSpot.posY] = nouv; // Met à jour pour ne pas superposer
     }
 }
 
@@ -487,8 +467,8 @@ Tunite *creeTourRoi(int posx, int posy){
     nouv->maposition = sol;
     nouv->pointsDeVie = 800;
     nouv->vitesseAttaque = 1.2;
-    nouv->degats = 180;
-    nouv->portee = 4;
+    nouv->degats = 80;
+    nouv->portee = 2;
     nouv->vitessedeplacement = 0;
     nouv->posX = posx;
     nouv->posY = posy;
@@ -566,7 +546,6 @@ Tunite *creeGargouille(int posx, int posy){
 }
 
 // Affichage des Tunites pour vérifier que ça fonctionne bien
-
 char* TuniteDuJeuToString(TuniteDuJeu t){
     char* resultat;
     switch((int) t){
@@ -637,11 +616,194 @@ void afficheTListePlayer(TListePlayer l){
 
 void positionnePlayerOnPlateau(TListePlayer player, TplateauJeu jeu){
     TListePlayer ptr = player;
-    while(!listeVide(ptr)){
+    while(ptr != NULL){
         Tunite *unite = ptr->pdata;
         if(unite->posX >= 0 && unite->posX < LARGEURJEU && unite->posY >= 0 && unite->posY < HAUTEURJEU){
             jeu[unite->posX][unite->posY] = unite;
         }
         ptr = ptr->suiv;
     }
+}
+
+//Sauvegarde
+
+//On compte pour savoir exactement combien d'unités il y a à sauvegarder dans chaque liste
+int compterUnites(TListePlayer liste) {
+    int compteur = 0;
+    TListePlayer ptr = liste;
+    while(ptr != NULL) {
+        compteur++;
+        ptr = ptr->suiv;
+    }
+    return compteur;
+}
+
+void sauvegarderPartieSequentiel(TListePlayer listeRoi, TListePlayer listeHorde, int** chemin) {
+    FILE *f_out = fopen("partieseq.cls", "w");
+    if(f_out == NULL) {
+        printf("Erreur : Impossible d'ecrire le fichier sequentiel.\n");
+        return;
+    }
+
+    //On doit d'abord sauvegarder notre chemin
+    for(int i = 0; i < NBCOORDPARCOURS; i++) {
+        fprintf(f_out, "%d %d ", chemin[i][X], chemin[i][Y]); // Espace important !
+    }
+    fprintf(f_out, "\n");
+
+    // Ensuite on compte le nombre d'unités dans chaque liste
+    int nbRoi = compterUnites(listeRoi);
+    int nbHorde = compterUnites(listeHorde);
+    fprintf(f_out, "%d %d\n", nbRoi, nbHorde);
+
+    // On sauvegarde le roi
+    TListePlayer ptr = listeRoi;
+    while(ptr != NULL) {
+        Tunite *unite = ptr->pdata;
+        fprintf(f_out, "%d %d %d %d %d ", unite->nom, unite->pointsDeVie, unite->posX, unite->posY, unite->peutAttaquer);
+        ptr = ptr->suiv;
+    }
+    fprintf(f_out, "\n");
+
+    // Puis la horde
+    ptr = listeHorde;
+    while(ptr != NULL) {
+        Tunite *unite = ptr->pdata;
+        fprintf(f_out, "%d %d %d %d %d ", unite->nom, unite->pointsDeVie, unite->posX, unite->posY, unite->peutAttaquer);
+        ptr = ptr->suiv;
+    }
+
+    fclose(f_out);
+    printf("Partie sauvegardee en sequentiel avec succes !\n");
+}
+
+void chargerPartieSequentiel(TListePlayer *listeRoi, TListePlayer *listeHorde, int** chemin, TplateauJeu jeu) {
+    FILE *f_in = fopen("partieseq.cls", "r");
+    if(f_in == NULL) return;
+
+    // On vide nos listes
+    viderListe(listeRoi);
+    viderListe(listeHorde);
+    initPlateauAvecNULL(jeu, LARGEURJEU, HAUTEURJEU);
+
+    // on charge le chemin
+    for(int i = 0; i < NBCOORDPARCOURS; i++) {
+        fscanf(f_in, "%d %d", &chemin[i][X], &chemin[i][Y]);
+    }
+
+    // Les unités
+    int nbRoi, nbHorde;
+    fscanf(f_in, "%d %d", &nbRoi, &nbHorde);
+
+    int nomId, pv, x, y, peutAtt;
+
+    // On charge et on recrée le roi
+    for(int i = 0; i < nbRoi; i++) {
+        fscanf(f_in, "%d %d %d %d %d", &nomId, &pv, &x, &y, &peutAtt);
+        Tunite *unite = NULL;
+        switch(nomId) {
+            case tourSol: unite = creeTourSol(x, y); break;
+            case tourAir: unite = creeTourAir(x, y); break;
+            case tourRoi: unite = creeTourRoi(x, y); break;
+        }
+        if(unite != NULL) {
+            unite->pointsDeVie = pv; unite->peutAttaquer = peutAtt;
+            ajouterUnite(listeRoi, unite);
+            jeu[x][y] = unite; // On replace sur le plateau
+        }
+    }
+
+    // Puis la horde
+    for(int i = 0; i < nbHorde; i++) {
+        fscanf(f_in, "%d %d %d %d %d", &nomId, &pv, &x, &y, &peutAtt);
+        Tunite *unite = NULL;
+        switch(nomId) {
+            case archer:  unite = creeArcher(x, y); break;
+            case chevalier: unite = creeChevalier(x, y); break;
+            case dragon:  unite = creeDragon(x, y); break;
+            case gargouille: unite = creeGargouille(x, y); break;
+        }
+        if(unite != NULL) {
+            unite->pointsDeVie = pv; unite->peutAttaquer = peutAtt;
+            ajouterUnite(listeHorde, unite);
+            jeu[x][y] = unite; // On replace sur le plateau
+        }
+    }
+
+    fclose(f_in);
+    printf("Partie chargee (Sequentiel) !\n");
+}
+
+void sauvegarderPartieBinaire(TListePlayer listeRoi, TListePlayer listeHorde, int** chemin) {
+    FILE *f_out = fopen("partiebin.clb", "wb");
+    if(f_out == NULL) return;
+
+    // Sauvegarder le chemin
+    for(int i = 0; i < NBCOORDPARCOURS; i++) {
+        fwrite(&chemin[i][X], sizeof(int), 1, f_out);
+        fwrite(&chemin[i][Y], sizeof(int), 1, f_out);
+    }
+
+    // On compte nos unités
+    int nbRoi = compterUnites(listeRoi);
+    int nbHorde = compterUnites(listeHorde);
+    fwrite(&nbRoi, sizeof(int), 1, f_out);
+    fwrite(&nbHorde, sizeof(int), 1, f_out);
+
+    // On sauvegarde le roi
+    TListePlayer ptr = listeRoi;
+    while(ptr != NULL) {
+        fwrite(ptr->pdata, sizeof(Tunite), 1, f_out);
+        ptr = ptr->suiv;
+    }
+
+    // On sauvegarde la horde
+    ptr = listeHorde;
+    while(ptr != NULL) {
+        fwrite(ptr->pdata, sizeof(Tunite), 1, f_out);
+        ptr = ptr->suiv;
+    }
+
+    fclose(f_out);
+    printf("Partie sauvegardee en binaire !\n");
+}
+
+void chargerPartieBinaire(TListePlayer *listeRoi, TListePlayer *listeHorde, int** chemin, TplateauJeu jeu) {
+    FILE *f_in = fopen("partiebin.clb", "rb");
+    if(f_in == NULL) return;
+
+    //On vide avant de remettre
+    viderListe(listeRoi);
+    viderListe(listeHorde);
+    initPlateauAvecNULL(jeu, LARGEURJEU, HAUTEURJEU);
+
+    // On charge notre chemin
+    for(int i = 0; i < NBCOORDPARCOURS; i++) {
+        fread(&chemin[i][X], sizeof(int), 1, f_in);
+        fread(&chemin[i][Y], sizeof(int), 1, f_in);
+    }
+
+    // Nos unités
+    int nbRoi, nbHorde;
+    fread(&nbRoi, sizeof(int), 1, f_in);
+    fread(&nbHorde, sizeof(int), 1, f_in);
+
+    // On refait le roi
+    for(int i = 0; i < nbRoi; i++) {
+        Tunite *unite = (Tunite*)malloc(sizeof(Tunite));
+        fread(unite, sizeof(Tunite), 1, f_in);
+        ajouterUnite(listeRoi, unite);
+        jeu[unite->posX][unite->posY] = unite; //pour remettre sur le plateau de jeu
+    }
+
+    // et la horde
+    for(int i = 0; i < nbHorde; i++) {
+        Tunite *unite = (Tunite*)malloc(sizeof(Tunite));
+        fread(unite, sizeof(Tunite), 1, f_in);
+        ajouterUnite(listeHorde, unite);
+        jeu[unite->posX][unite->posY] = unite; //pour remettre sur le plateau de jeu
+    }
+
+    fclose(f_in);
+    printf("Partie chargee (Binaire) !\n");
 }
