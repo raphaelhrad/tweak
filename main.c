@@ -58,8 +58,7 @@ int main(int argc, char* argv[])
         message("Commandes importantes","ECHAP->quitter, S/C ET D/V pour gérer les sauvegardes. Bon jeu !");
 
         /**********************************************************************/
-        /* DEFINISSEZ/INITIALISER ICI VOS VARIABLES              */
-
+        //variables
         TListePlayer listeHorde = initHorde();
         TListePlayer listeRoi = initRoi();
 
@@ -68,9 +67,7 @@ int main(int argc, char* argv[])
         // Dans towerdefend.c, vous avez ajouté ajouterUnite(&listeRoi, roiInitial)
         listeRoi = AjoutEnTete(listeRoi, roiInitial);
 
-        /* FIN de vos variables                                               */
         /**********************************************************************/
-
         // boucle principale du jeu
         int cont = 1;
         int cpt = 0; //Compteur pour que les tours apparaissent à un ratio plus faible
@@ -87,8 +84,10 @@ int main(int argc, char* argv[])
                 positionnePlayerOnPlateau(listeRoi, jeu);
 
                 // Création des unités
-                creationUniteAleatoireHorde(&listeHorde, tabParcours);
-                if (cpt % 10 == 0){
+                if (cpt % 2 == 0){
+                    creationUniteAleatoireHorde(&listeHorde, tabParcours);
+                }
+                if (cpt % 15 == 0){ //pour que les tours n'arrivent pas trop vite
                     creationUniteAleatoireRoi(&listeRoi, tabParcours, jeu);
                 }
 
@@ -109,14 +108,6 @@ int main(int argc, char* argv[])
                     current = current->suiv;
                 }
 
-                // Déplacement horde
-
-                TListePlayer ptrHorde = listeHorde;
-                while(!listeVide(ptrHorde)){
-                    avancerUnite(ptrHorde->pdata, jeu, tabParcours);
-                    ptrHorde = ptrHorde->suiv;
-                }
-
                 //Phase de combat
 
                 TListePlayer ptrRoi = listeRoi;
@@ -125,9 +116,17 @@ int main(int argc, char* argv[])
                     ptrRoi = ptrRoi->suiv;
                 }
 
-                ptrHorde = listeHorde;
+                TListePlayer ptrHorde = listeHorde;
                 while (ptrHorde != NULL) {
                     combat(pWinSurf, ptrHorde->pdata, &listeRoi, jeu);
+                    ptrHorde = ptrHorde->suiv;
+                }
+
+                // Déplacement horde
+
+                ptrHorde = listeHorde;
+                while(!listeVide(ptrHorde)){
+                    avancerUnite(ptrHorde->pdata, jeu, tabParcours);
                     ptrHorde = ptrHorde->suiv;
                 }
 

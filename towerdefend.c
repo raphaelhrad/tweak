@@ -167,7 +167,7 @@ bool UniteRoiPresente(TListePlayer playerRoi){
     while(!listeVide(ptr)){
         Tunite *currentUnite = ptr->pdata;
         if(currentUnite->nom == tourRoi){
-            printf("pv roi : %d", currentUnite->pointsDeVie);
+            printf("Pv roi : %d\n", currentUnite->pointsDeVie);
             return true;
         }
         ptr = ptr->suiv;
@@ -180,7 +180,7 @@ bool tourRoiDetruite(TListePlayer playerRoi){
     //s'il a été supprimé : true
     //sinon : false
     if(UniteRoiPresente(playerRoi)){
-        printf("Tour du Roi toujours presente\n");
+        printf("Tour du Roi toujours présente\n");
         return false;
     }
     else{
