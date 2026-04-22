@@ -295,25 +295,20 @@ void supprimerUnite(TListePlayer *player, Tunite *UniteDetruite, TplateauJeu jeu
     *player = supprimerUniteListe(*player,*UniteDetruite);
 }
 
-
-/** (C'est un commentaire de doc mais c'est super important que je le vois)
-Attention, dans la fonction AjoutEnTete, je n'ajoute que des copies d'unités.
-Or lorsqu'une modification a besoin de se transmettre sur l'ensemble des entités pointant l'unité en question,
-toute unité ayant utilisée cette méthode ne pointe pas vers l'unité originale mais vers une copie. Dans cette fonction, les modification
-effectuées sur les points de vies de l'unité cible n'était pas visible par listeplayer car dans listeUniteCible, c'est une copie de l'unité
-originale donc aucun impact sur l'originale. C'est pourquoi j'ai crée la fonction AjoutEnTeteV2 qui prend un pointeur sur Tunite et non pas
-un Tunite */
 void combat(SDL_Surface *surface, Tunite *UniteAttaquante, TListePlayer *listeplayer, TplateauJeu jeu){ //Penser à supprimer cette partie
     //Attaque de UniteAttaquante soustraite à PV d'UniteCible
     //Soustraction des dégats sur UniteCible
     TListePlayer listeUniteCible = quiEstAPortee(jeu,UniteAttaquante);
-    Tunite *UniteCible = premierElementTListePlayer(listeUniteCible);
-    UniteCible->pointsDeVie = UniteCible->pointsDeVie - UniteAttaquante->degats;
-    if(UniteCible->pointsDeVie <= 0){
-        //Si 0 ou moins PDV : supprimerUnite
-        supprimerUnite(listeplayer,UniteCible,jeu);
+    if (listeUniteCible != NULL){
+        Tunite *UniteCible = premierElementTListePlayer(listeUniteCible);
+        dessineAttaque(surface,UniteAttaquante,UniteCible);
+        UniteCible->pointsDeVie = UniteCible->pointsDeVie - UniteAttaquante->degats;
+        if(UniteCible->pointsDeVie <= 0){
+            //Si 0 ou moins PDV : supprimerUnite
+            supprimerUnite(listeplayer,UniteCible,jeu);
+        }
     }
-    dessineAttaque(surface,UniteAttaquante,UniteCible);
+
 }
 
 //Déplacement
@@ -322,10 +317,10 @@ int ProchaineCaseChemin(int** chemin, Tunite* Unite){
     int indexCase = 0;
     bool indexTrouve = false;
     while(!indexTrouve && indexCase < NBCOORDPARCOURS){
-        indexCase++;
         if(Unite->posX == chemin[indexCase][X] && Unite->posY == chemin[indexCase][Y]){
             indexTrouve = true;
         }
+        indexCase++;
     }
     if(indexCase > 0 && indexCase < NBCOORDPARCOURS - 1){
         return indexCase + 1; //Case suivante du tableau chemin
@@ -338,23 +333,44 @@ int ProchaineCaseChemin(int** chemin, Tunite* Unite){
     }
 }
 
-
 void avancerUnite(Tunite* Unite, TplateauJeu jeu, int** chemin){
     int caseSuiv = ProchaineCaseChemin(chemin, Unite);
-    int coordXCaseSuiv = chemin[caseSuiv][X], coordYCaseSuiv = chemin[caseSuiv][Y];
+    int coordXCaseSuiv = chemin[caseSuiv][X];
+    int coordYCaseSuiv = chemin[caseSuiv][Y];
     if(jeu[coordXCaseSuiv][coordYCaseSuiv] == NULL){ // Si aucune autre unité de la horde se trouve sur la prochaine case alors on peut avancer l'unité
         Unite->posX = coordXCaseSuiv;
         Unite->posY = coordYCaseSuiv;
+        jeu[coordXCaseSuiv][coordYCaseSuiv] = Unite;
     } // Sinon on ne fait rien, elle reste là où elle est
 }
 
+Tcoord TrouverMeilleurEmplacement(TplateauJeu jeu, int** chemin, int portee) {
+    Tcoord meilleur = {-1, -1, -1};
+    int meilleurScore = -1;
 
+    for(int i = 0; i < LARGEURJEU; i++){
+        for(int j = 0; j < HAUTEURJEU; j++){
+            // Il faut vérifier que la case est bien  vide
+            if(jeu[i][j] == NULL) {
+                int score = NbCaseCheminAPortee(i, j, portee, chemin);
+                // Si la case n'est pas sur le chemin et bat le record alors on l'utilise
+                if(score > meilleurScore){
+                    meilleurScore = score;
+                    meilleur.posX = i;
+                    meilleur.posY = j;
+                    meilleur.score_emplacement = score;
+                }
+            }
+        }
+    }
+    return meilleur;
+}
 
 //Création
 
 
 void ajouterUnite(TListePlayer *player, Tunite *nouvelleUnite){
-    AjoutEnTete(*player,nouvelleUnite);
+    *player = AjoutEnTete(*player,nouvelleUnite);
 }
 
 int NbCaseCheminAPortee(int posX, int posY, int portee, int** chemin){
@@ -391,19 +407,42 @@ int NbCaseCheminAPortee(int posX, int posY, int portee, int** chemin){
     return listeEmplacement;
 }*/
 
+void creationUniteAleatoireRoi(TListePlayer *listeRoi, int** chemin, TplateauJeu jeu){
+    int proba = rand() % 100;
+    Tunite *nouv = NULL;
+    int porteeTest = 3; // Portée moyenne pour tester l'emplacement
 
-void creationUniteAleatoireRoi(TListePlayer listeRoi, int** chemin){
     // Tour Sol : 40%, Tour Air : 40%, Aucune : 20%
-    /* - Générer des coordonnées aléatoires
-       - Vérifier la validité (il ne faut pas quelles représentes une case du chemin ou l'emplacement d'une autre tour)
-       - Vérifier la logique (aucun intérêt si elle est placée à un endroit ou elle n'aura jamais la portée suffisante pour attaquer) */
-
-
+    if(proba < 80) {
+        Tcoord meilleurSpot = TrouverMeilleurEmplacement(jeu, chemin, porteeTest);
+        if(meilleurSpot.posX != -1 && meilleurSpot.posY != -1) {
+            if(proba < 40) {
+                nouv = creeTourSol(meilleurSpot.posX, meilleurSpot.posY);
+            } else {
+                nouv = creeTourAir(meilleurSpot.posX, meilleurSpot.posY);
+            }
+            ajouterUnite(listeRoi, nouv);
+            jeu[meilleurSpot.posX][meilleurSpot.posY] = nouv; // Met à jour pour ne pas superposer
+        }
+    }
 }
 
-void creationUniteAleatoireHorde(TListePlayer listeHorde, int** chemin){
+void creationUniteAleatoireHorde(TListePlayer *listeHorde, int** chemin){
+    // Génération d'un nombre entre 0 et 99 pour les probabilités
+    int proba = rand() % 100;
+    int departX = chemin[0][X];
+    int departY = chemin[0][Y];
+    Tunite *nouv = NULL;
+
     // Chevalier : 15%, Dragon : 20%, Archer : 20%, Gargouille : 25%, Aucune : 20%
-    // Les unités de la horde apparaissent toujours au début du chemin
+    if(proba < 15) { nouv = creeChevalier(departX, departY); }
+    else if(proba < 35) { nouv = creeDragon(departX, departY); }     // 15 + 20
+    else if(proba < 55) { nouv = creeArcher(departX, departY); }     // 35 + 20
+    else if(proba < 80) { nouv = creeGargouille(departX, departY); } // 55 + 25
+
+    if(nouv != NULL){
+        ajouterUnite(listeHorde, nouv);
+    }
 }
 
 //Valeurs des unités
@@ -596,15 +635,13 @@ void afficheTListePlayer(TListePlayer l){
     }
 }
 
-// Fonction permettant de reconstruire le plateau de jeu à chaque tour
-
-void PositionnePlayerOnPlateau(TListePlayer player, TplateauJeu jeu){
-    //Si il n'y a eu aucun chagement de position alors on ne change rien
-    //Si l'unité a changé de position (les coordonnées de l'unité ne correspondent plus au placement sur le plateau) alors on effectue les modifications nécessaires
-    //Si une nouvelle unité apparaît alors on effectue les modifications nécessaires
-
+void positionnePlayerOnPlateau(TListePlayer player, TplateauJeu jeu){
+    TListePlayer ptr = player;
+    while(!listeVide(ptr)){
+        Tunite *unite = ptr->pdata;
+        if(unite->posX >= 0 && unite->posX < LARGEURJEU && unite->posY >= 0 && unite->posY < HAUTEURJEU){
+            jeu[unite->posX][unite->posY] = unite;
+        }
+        ptr = ptr->suiv;
+    }
 }
-
-
-
-

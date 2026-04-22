@@ -1,12 +1,9 @@
 //"surcouche partielle" de la SDL pour les affichages liés au jeu2048
-
-#include "SDL.h"
-#include "towerdefend.h"
 #ifndef MASDL_H_INCLUDED
 #define MASDL_H_INCLUDED
 
-
-
+#include "SDL.h"
+#include "towerdefend.h"
 
 void message(char *myTitle, char *myMessage);
 
@@ -20,7 +17,7 @@ void maj_fenetre(SDL_Window *pWindow);
 
 void prepareAllSpriteDuJeu(TplateauJeu jeu, int** chemin, int largeur, int hauteur, SDL_Surface **TabSprite, SDL_Surface* destination );
 void dessineAttaque(SDL_Surface *surface, Tunite *attaquant, Tunite *cible );
-void combat(SDL_Surface *surface, Tunite *UniteAttaquante, TListePlayer *listeplayer, TplateauJeu jeu); //Je suis obligée de la mettre ici pour qu'elle soit reconnue
+void combat(SDL_Surface *surface, Tunite *UniteAttaquante, TListePlayer *listeEnnemie, TplateauJeu jeu); //Je suis obligée de la mettre ici pour qu'elle soit reconnue
 
 
 // propre à la sdl

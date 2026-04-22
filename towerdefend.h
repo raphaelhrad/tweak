@@ -54,9 +54,15 @@ typedef struct {
 
 typedef T_cellCoord *TListeCoord;
 
-
+TListePlayer initHorde();
+TListePlayer initRoi();
 
 typedef Tunite* ** TplateauJeu;  ////tableau a deux dimensions de largeur 11 et hauteur 19 contenant des pointeurs (Tunite*)
+
+Tcoord TrouverMeilleurEmplacement(TplateauJeu jeu, int** chemin, int portee);
+
+void creationUniteAleatoireRoi(TListePlayer *listeRoi, int** chemin, TplateauJeu jeu);
+void creationUniteAleatoireHorde(TListePlayer *listeHorde, int** chemin);
 
 TplateauJeu AlloueTab2D(int largeur, int hauteur);
 void afficheCoordonneesParcours(int **t, int nbcoord);
@@ -98,6 +104,7 @@ Tunite *creeChevalier(int posx, int posy);
 
 
 void supprimerUnite(TListePlayer *player, Tunite *UniteDetruite, TplateauJeu jeu);
+
 /*void AjouterUnite(TListePlayer *player, Tunite *nouvelleUnite);
 */
 // Affichage Tunite
@@ -106,5 +113,7 @@ char* TuniteDuJeuToString(TuniteDuJeu t);
 char* TcibleToString(Tcible c);
 void printUnite(Tunite u);
 void afficheTListePlayer(TListePlayer l);
-
+void positionnePlayerOnPlateau(TListePlayer player, TplateauJeu jeu);
+void sauvegarderPartieSequentiel(TListePlayer listeRoi, TListePlayer listeHorde);
+void chargerPartieSequentiel(TListePlayer *listeRoi, TListePlayer *listeHorde, char* nomFichier);
 #endif // TOWERDEFEND_H_INCLUDED

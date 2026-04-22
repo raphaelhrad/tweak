@@ -71,5 +71,13 @@ void tri_selection_liste(TListePlayer l, bool (*fcomp)(Tunite a, Tunite b)){
     }
 }
 
-
+void viderListe(TListePlayer *l) {
+    while(!listeVide(*l)) {
+        TListePlayer temp = *l;
+        *l = (*l)->suiv;
+        free(temp->pdata); // Libère l'unité
+        free(temp);        // Libère la cellule
+    }
+    *l = NULL;
+}
 
