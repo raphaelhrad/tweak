@@ -1,0 +1,27 @@
+Fonction quiEstAPortee : 
+
+test 1 : (sans débordement)
+
+uniteAttaquante = (4,6)
+portee = 2
+uniteCible = (3,7)
+uniteNonCible = (1,8)
+
+test réussi
+
+test 2 : (avec débordement de la hauteur en bas)
+
+uniteAttaquante = (2,1)
+portee = 2
+uniteCible = (4,0)
+uniteNonCible = (5,5)
+
+test réussi 
+
+Fonction combat : 
+
+tourRoi = (3,7)
+gargouille = (3,6)
+TlistePlayer listeRoi = tourRoi, tourSol
+
+test réussi

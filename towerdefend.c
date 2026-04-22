@@ -1,7 +1,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "SDL.h"
+#include "maSDL.h"
+#include "listeChainee.h"
 #include "towerdefend.h"
 
 
@@ -146,35 +147,139 @@ void affichePlateauConsole(TplateauJeu jeu, int largeur, int hauteur){
 }
 */
 
+
+/** !! A chaque tour on reconstruit le plateau de jeu, ainsi les fonctions ne modifie que l'unité et la liste du joueur, le plateau sera recrée grâce aux listes modifiées des deux joueurs !! */
+
 //Combat
 
-bool tourRoiDetruite(TListePlayer playerRoi){
- //récupérer le roi dans la liste
- //s'il a été supprimé : true
- //sinon : false
+bool UniteRoiPresente(TListePlayer playerRoi){
+    if(listeVide(playerRoi)){
+        printf("Erreur UniteRoiPresente : La liste est vide\n");
+        return false;
+    }
+    TListePlayer ptr = playerRoi;
+    while(!listeVide(ptr)){
+        Tunite *currentUnite = ptr->pdata;
+        if(currentUnite->nom == tourRoi){
+            return true;
+        }
+        ptr = ptr->suiv;
+    }
+    return false;
 }
 
-/*
-Fonction de tri
+bool tourRoiDetruite(TListePlayer playerRoi){
+    //récupérer le roi dans la liste
+    //s'il a été supprimé : true
+    //sinon : false
+    if(UniteRoiPresente(playerRoi)){
+        printf("Tour du Roi toujours presente\n");
+        return false;
+    }
+    else{
+        printf("Tour du Roi detruite\n");
+        return true;
+    }
+}
+
+int CoordValideEnX(int calculCoord){
+    if(calculCoord < 0){ return 0; }
+    if(calculCoord > LARGEURJEU - 1){ return LARGEURJEU - 1; }
+    return calculCoord;
+}
+
+int CoordValideEnY(int calculCoord){
+    if(calculCoord < 0){ return 0; }
+    if(calculCoord > HAUTEURJEU - 1){ return HAUTEURJEU - 1; }
+    return calculCoord;
+}
+
+
+
+bool peutAttaquer(Tunite* UniteAttaquante, Tunite* UniteCible){
+    if(UniteAttaquante == NULL || UniteCible == NULL){
+        return false;
+    }
+    if(UniteAttaquante->nom == chevalier || UniteAttaquante->nom == archer || UniteAttaquante->nom == dragon || UniteAttaquante->nom == gargouille){
+        if(UniteCible->nom == tourRoi){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    else if(UniteAttaquante->nom == tourRoi){
+        if(UniteCible->nom == tourAir || UniteCible->nom == tourSol){
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+    else if(UniteAttaquante->nom == tourAir){
+        if(UniteCible->maposition == air && UniteCible->nom != tourAir){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    else{
+        if(UniteCible->maposition == sol && UniteCible->nom != tourSol && UniteCible->nom != tourRoi){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+}
 
 TListePlayer quiEstAPortee(TplateauJeu jeu, Tunite *UniteAttaquante){
     TListePlayer listePortee;
-    TListePlayer = NULL;
-    for (int i = ;)
-        for (int j =; )
-            Si UniteAttaquante ou PAS, Horde vs Horde pas possible
-    Tri de la liste par pdv
+    initListe(&listePortee);
+    //Calcul coordonnées (il faudra changer le début et la fin en regardant le schéma dans le pdf)
+    int posxD = CoordValideEnX(UniteAttaquante->posX - UniteAttaquante->portee);
+    int posyD = CoordValideEnY(UniteAttaquante->posY - UniteAttaquante->portee);
+    int posxF = CoordValideEnX(UniteAttaquante->posX + UniteAttaquante->portee);
+    int posyF = CoordValideEnY(UniteAttaquante->posY + UniteAttaquante->portee);
+    //Parcours du tableau pour chercher les unités à portée
+    /* - si l'unite fait partie de la horde alors que l'unité attaquante est de la horde on l'ignore
+       - si l'unite est une tour du roi alors on l'ignore
+       - Toutes les cibles ne sont pas attaquables, bien vérifier que l'unite attaquante peut attaquer l'unité à portée
+    */
+    for(int largeur = posxD ; largeur <= posxF; largeur++){
+        for(int hauteur = posyD; hauteur <= posyF; hauteur++){
+            Tunite* UniteCible = jeu[largeur][hauteur];
+            if(largeur == UniteAttaquante->posX && hauteur == UniteAttaquante->posY){ //Peut-être mieux de dire de ne pas attaquer la case ou se trouve l'unité attaquante
+                continue;
+            }
+            if(peutAttaquer(UniteAttaquante,UniteCible)){
+                listePortee = AjoutEnTete(listePortee,UniteCible);
+            }
+        }
+    }
+    //Tri de la liste selon le nombre de points de vie
+    tri_selection_liste(listePortee,comparaisonPDVAinfB);
     return listePortee;
-    Toutes les cibles ne sont pas attaquables : air, sol, airsol
 }
-*/
+
 
 bool comparaisonPDVAinfB(Tunite UniteA, Tunite UniteB){
     return UniteA.pointsDeVie < UniteB.pointsDeVie;
 }
 
-bool comparaisonUniteAegaleB(Tunite UniteA, Tunite UniteB){
-    return true;
+bool comparaisonUniteAegaleB(Tunite UniteA, Tunite UniteB){ // Il faut faire très attention avec l'utilisation de cette fonction car elle ne vérifie pas si les deux unités sont valides
+    return (UniteA.nom == UniteB.nom)
+        && (UniteA.cibleAttaquable == UniteB.cibleAttaquable)
+        && (UniteA.maposition == UniteB.maposition)
+        && (UniteA.pointsDeVie == UniteB.pointsDeVie)
+        && (UniteA.vitesseAttaque == UniteB.vitesseAttaque)
+        && (UniteA.degats == UniteB.degats)
+        && (UniteA.portee == UniteB.portee)
+        && (UniteA.vitessedeplacement == UniteB.vitessedeplacement)
+        && (UniteA.posX == UniteB.posX)
+        && (UniteA.posY == UniteB.posY)
+        && (UniteA.peutAttaquer == UniteB.peutAttaquer) ;
 }
 
 Tunite* premierElementTListePlayer(TListePlayer listeUnites){
@@ -182,64 +287,123 @@ Tunite* premierElementTListePlayer(TListePlayer listeUnites){
 }
 
 void supprimerUnite(TListePlayer *player, Tunite *UniteDetruite, TplateauJeu jeu){
-    //Si PDV inf ou égal 0, alors suppression dans liste player et sur plateau
-    //Si Tunite est dernière unité de joueur, alors liste = NULL
+    // Récupération des coordonnées de l'unité détruite
+    int coordxUnite = UniteDetruite->posX, coordyUnite = UniteDetruite->posY;
+    // Retirer le pointeur vers cette unité dans le plateau de jeu
+    jeu[coordxUnite][coordyUnite] = NULL; // Vu qu'on reconstruit le plateau avec les listes des joueurs dans une autre fonction on a pas besoin de le faire ici
+    //Retirer l'unité de la liste du joueur
+    *player = supprimerUniteListe(*player,*UniteDetruite);
 }
 
-void combat(SDL_Surface *surface, Tunite *UniteAttaquante, Tunite *UniteCible){
-    //Soustraction des dégats sur UniteCible
+
+/** (C'est un commentaire de doc mais c'est super important que je le vois)
+Attention, dans la fonction AjoutEnTete, je n'ajoute que des copies d'unités.
+Or lorsqu'une modification a besoin de se transmettre sur l'ensemble des entités pointant l'unité en question,
+toute unité ayant utilisée cette méthode ne pointe pas vers l'unité originale mais vers une copie. Dans cette fonction, les modification
+effectuées sur les points de vies de l'unité cible n'était pas visible par listeplayer car dans listeUniteCible, c'est une copie de l'unité
+originale donc aucun impact sur l'originale. C'est pourquoi j'ai crée la fonction AjoutEnTeteV2 qui prend un pointeur sur Tunite et non pas
+un Tunite */
+void combat(SDL_Surface *surface, Tunite *UniteAttaquante, TListePlayer *listeplayer, TplateauJeu jeu){ //Penser à supprimer cette partie
     //Attaque de UniteAttaquante soustraite à PV d'UniteCible
-    //Si 0 ou moins PDV : supprimerUnite
+    //Soustraction des dégats sur UniteCible
+    TListePlayer listeUniteCible = quiEstAPortee(jeu,UniteAttaquante);
+    Tunite *UniteCible = premierElementTListePlayer(listeUniteCible);
+    UniteCible->pointsDeVie = UniteCible->pointsDeVie - UniteAttaquante->degats;
+    if(UniteCible->pointsDeVie <= 0){
+        //Si 0 ou moins PDV : supprimerUnite
+        supprimerUnite(listeplayer,UniteCible,jeu);
+    }
+    dessineAttaque(surface,UniteAttaquante,UniteCible);
 }
 
 //Déplacement
-/*
-(à vérifier) prochaineCaseChemin(Tplateau jeu, int** chemin, Tunite* Unite){
-    //vérifier la validité des coordonnées données
-    //donc si la case suivante n'est pas prise
-    //si prise : renvoie les mêmes coordonnées
-    //sinon : prochaine case chemin
-}
-*/
 
-void modifierPositionUnite(Tunite *Unite, int posx, int posy){
- //modifier posx et posy
-}
-
-void modifierPositionPlateau(TplateauJeu jeu, int posx, int posy){
-    //placer le pointeur de l'unité sur la nouvelle case
+int ProchaineCaseChemin(int** chemin, Tunite* Unite){
+    int indexCase = 0;
+    bool indexTrouve = false;
+    while(!indexTrouve && indexCase < NBCOORDPARCOURS){
+        indexCase++;
+        if(Unite->posX == chemin[indexCase][X] && Unite->posY == chemin[indexCase][Y]){
+            indexTrouve = true;
+        }
+    }
+    if(indexCase > 0 && indexCase < NBCOORDPARCOURS - 1){
+        return indexCase + 1; //Case suivante du tableau chemin
+    }
+    if(indexCase == NBCOORDPARCOURS - 1){
+        return indexCase; // C'est la dernière case donc on renvoie la même car il n'y a pas de case suivante
+    }
+    else{
+        return indexCase; // Il faut faire de la gestion d'erreur
+    }
 }
 
 
 void avancerUnite(Tunite* Unite, TplateauJeu jeu, int** chemin){
-    //prochaineCaseChemin
-    //modifierPositionUnite/modifierPositionPlateau
+    int caseSuiv = ProchaineCaseChemin(chemin, Unite);
+    int coordXCaseSuiv = chemin[caseSuiv][X], coordYCaseSuiv = chemin[caseSuiv][Y];
+    if(jeu[coordXCaseSuiv][coordYCaseSuiv] == NULL){ // Si aucune autre unité de la horde se trouve sur la prochaine case alors on peut avancer l'unité
+        Unite->posX = coordXCaseSuiv;
+        Unite->posY = coordYCaseSuiv;
+    } // Sinon on ne fait rien, elle reste là où elle est
 }
+
+
+
+//Création
+
 
 void ajouterUnite(TListePlayer *player, Tunite *nouvelleUnite){
-    //ajouter à la fin de notre liste player cette nouvelle unité
-    //si NULL : aucune
+    AjoutEnTete(*player,nouvelleUnite);
 }
 
-/* à faire en dernier car algorithme
-à vérifier positionCreationUniteRoi(){
+int NbCaseCheminAPortee(int posX, int posY, int portee, int** chemin){
+    int posxD = CoordValideEnX(posX - portee);
+    int posyD = CoordValideEnY(posY - portee);
+    int posxF = CoordValideEnX(posX + portee);
+    int posyF = CoordValideEnY(posY + portee);
+    int cpt = 0;
+    for(int i = 0; i < NBCOORDPARCOURS; i++){
+       if(posX == chemin[i][X] && posY == chemin[i][Y]){
+            return -1; // C'est une case du chemin donc on l'évite
+       }
+       if((chemin[i][X] >= posxD && chemin[i][X] <= posxF) && (chemin[i][Y] >= posyD && chemin[i][Y] <= posyF)){
+            cpt++;
+       }
+    }
+    return cpt;
+}
+
+/*TListe EmplacementTourRoi(int largeur, int hauteur, int portee, int** chemin){
+    TListe listeEmplacement = NULL;
+    for(int i = 0; i < largeur; i++){
+        for(int j = 0; j < hauteur; j++){
+            int nbCase = NbCaseCheminAPortee(i,j,portee,chemin);
+            if(nbCase > 0){
+                // Tcoord* data = malloc(sizeof(Tcoord));
+                // data->posX = i;
+                // data->posY = j;
+                // data->score_emplacement = nbCase;
+                // listeEmplacement = AjoutEnTete(listeEmplacement,data);
+            }
+        }
+    }
+    return listeEmplacement;
+}*/
+
+
+void creationUniteAleatoireRoi(TListePlayer listeRoi, int** chemin){
+    // Tour Sol : 40%, Tour Air : 40%, Aucune : 20%
+    /* - Générer des coordonnées aléatoires
+       - Vérifier la validité (il ne faut pas quelles représentes une case du chemin ou l'emplacement d'une autre tour)
+       - Vérifier la logique (aucun intérêt si elle est placée à un endroit ou elle n'aura jamais la portée suffisante pour attaquer) */
+
 
 }
-*/
 
-void creationUniteAleatoireRoi(){
-    //15-50% de proba
-    //si la proba est bonne alors:
-        //0,1,2
-        //creerTour...
-}
-
-void creationUniteAleatoireHorde(){
-    //5-60% de proba
-    //position pour horde au même endroit : début chemin : premiere valeur liste chemin
-    //si la proba est bonne alors:
-        //0,1,2...
-        //creer...
+void creationUniteAleatoireHorde(TListePlayer listeHorde, int** chemin){
+    // Chevalier : 15%, Dragon : 20%, Archer : 20%, Gargouille : 25%, Aucune : 20%
+    // Les unités de la horde apparaissent toujours au début du chemin
 }
 
 //Valeurs des unités
@@ -363,4 +527,84 @@ Tunite *creeGargouille(int posx, int posy){
 }
 
 // Affichage des Tunites pour vérifier que ça fonctionne bien
+
+char* TuniteDuJeuToString(TuniteDuJeu t){
+    char* resultat;
+    switch((int) t){
+        case 0 :
+            resultat = "tourSol";
+            break;
+        case 1 :
+            resultat = "tourAir";
+            break;
+        case 2 :
+            resultat = "tourRoi";
+            break;
+        case 3 :
+            resultat = "archer";
+            break;
+        case 4 :
+            resultat = "chevalier";
+            break;
+        case 5 :
+            resultat = "dragon";
+            break;
+        case 6 :
+            resultat = "gargouille";
+            break;
+        default :
+            resultat = "inconnu";
+            break;
+    }
+    return resultat;
+}
+
+char* TcibleToString(Tcible c){
+    char* resultat;
+    switch((int) c){
+        case 0 :
+            resultat = "sol";
+            break;
+        case 1 :
+            resultat = "solEtAir";
+            break;
+        case 2 :
+            resultat = "air";
+            break;
+        default :
+            resultat = "inconnu";
+            break;
+    }
+    return resultat;
+}
+
+void printUnite(Tunite u){
+    printf("nom : %s ; cibleAttaquable : %s ; maposition : %s ; pointsDeVie: %d ; vitesseAttaque : %f ; degats : %d ; portee : %d ; vitessedeplacement : %f ; posX : %d ; posY : %d ; peutAttaquer : %d\n",
+           TuniteDuJeuToString(u.nom),TcibleToString(u.cibleAttaquable),TcibleToString(u.maposition),u.pointsDeVie,u.vitesseAttaque,u.degats,u.portee,u.vitessedeplacement,u.posX,u.posY,u.peutAttaquer);
+}
+
+void afficheTListePlayer(TListePlayer l){
+    if(listeVide(l)){
+        printf("Erreur afficheTListePlayer : la liste est vide\n");
+        return;
+    }
+    TListePlayer ptr = l;
+    while(!listeVide(ptr)){
+        printUnite(*ptr->pdata);
+        printf("\n");
+        ptr = ptr->suiv;
+    }
+}
+
+// Fonction permettant de reconstruire le plateau de jeu à chaque tour
+
+void PositionnePlayerOnPlateau(TListePlayer player, TplateauJeu jeu){
+    //Si il n'y a eu aucun chagement de position alors on ne change rien
+    //Si l'unité a changé de position (les coordonnées de l'unité ne correspondent plus au placement sur le plateau) alors on effectue les modifications nécessaires
+    //Si une nouvelle unité apparaît alors on effectue les modifications nécessaires
+
+}
+
+
+
 
